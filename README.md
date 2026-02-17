@@ -8,3 +8,6 @@ A Python foundations portfolio to demonstrate readiness for OMSCS: functions, lo
 
 ## Progress Log
 See progress_log.md
+
+## Run tests
+py -m pytest -q
