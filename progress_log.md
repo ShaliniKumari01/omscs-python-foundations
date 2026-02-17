@@ -13,7 +13,9 @@
 - Committed and pushed changes
 
 ## Day 3 (Python)
-- lists_tuples/remove_duplicates_preserve_order.py
-- collections/char_frequency.py
-- file_io/simple_csv_read_write.py (writes and reads a small CSV)
+- Added exercises:
+  - lists_tuples/remove_duplicates_preserve_order.py
+  - collections/char_frequency.py
+  - file_io/simple_csv_read_write.py
+- Ran scripts successfully (CSV write/read validated)
 
