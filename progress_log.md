@@ -19,3 +19,8 @@
   - file_io/simple_csv_read_write.py
 - Ran scripts successfully (CSV write/read validated)
 
+## Day 4 (Python)
+- functions/safe_divide.py + tests
+- dicts_sets/two_sum.py + tests
+- file_io/log_parser_counts.py + tests
+- pytest suite: 17 passed
