@@ -207,4 +207,7 @@ marimo/_lsp/
 __marimo__/
 people.csv
 sample.log
-
+mini_apps/expense_tracker/data/
+mini_apps/**/__pycache__/
+__pycache__/
+*.pyc
