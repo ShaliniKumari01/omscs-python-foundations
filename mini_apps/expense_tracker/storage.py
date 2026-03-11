@@ -84,7 +84,7 @@ def summarize(expenses: list[Expense]) -> dict[str, float]:
     totals: dict[str, float] = {"TOTAL": 0.0}
     for e in expenses:
         totals["TOTAL"] += e.amount
-        key = f"CAT:{e.category}"
+        key = f"CAT:{e.category.strip().lower()}"
         totals[key] = totals.get(key, 0.0) + e.amount
     return totals
 
@@ -120,3 +120,13 @@ def export_month_summary_csv(path: str, expenses: list[Expense], yyyy_mm: str) -
     month_expenses = filter_by_month(expenses, yyyy_mm)
     totals = summarize(month_expenses)
     export_summary_csv(path, totals)
+    
+
+def summarize_month(expenses: list[Expense], yyyy_mm: str) -> dict[str, float]:
+    month_exp = filter_by_month(expenses, yyyy_mm)
+    return summarize(month_exp)
+
+
+def summarize_category(expenses: list[Expense], category: str) -> dict[str, float]:
+    cat_exp = filter_by_category(expenses, category)
+    return summarize(cat_exp)

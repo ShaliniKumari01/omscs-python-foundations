@@ -9,6 +9,8 @@ from mini_apps.expense_tracker.storage import (
     filter_by_category,
     export_summary_csv,
     export_month_summary_csv,
+    summarize_month,
+    summarize_category
 )
 
 
@@ -90,3 +92,27 @@ def test_export_month_summary_csv(tmp_path):
     assert "TOTAL,30.00" in content
     assert "CAT:groceries,10.00" in content
     assert "CAT:fuel,20.00" in content
+    
+    
+    
+def test_summarize_month():
+    exp = [
+        Expense(date(2026, 2, 1), "groceries", 10.0, ""),
+        Expense(date(2026, 2, 2), "fuel", 20.0, ""),
+        Expense(date(2026, 3, 1), "groceries", 30.0, ""),
+    ]
+    totals = summarize_month(exp, "2026-02")
+    assert totals["TOTAL"] == 30.0
+    assert totals["CAT:groceries"] == 10.0
+    assert totals["CAT:fuel"] == 20.0
+
+
+def test_summarize_category():
+    exp = [
+        Expense(date(2026, 2, 1), "Groceries", 10.0, ""),
+        Expense(date(2026, 2, 2), "fuel", 20.0, ""),
+        Expense(date(2026, 2, 3), "GROCERIES", 5.0, ""),
+    ]
+    totals = summarize_category(exp, "groceries")
+    assert totals["TOTAL"] == 15.0
+    assert totals["CAT:groceries"] == 15.0

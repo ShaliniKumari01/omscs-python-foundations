@@ -34,3 +34,8 @@
 - Expense Tracker v2: added filter_by_category (case-insensitive)
 - Added CSV export for summaries (export_summary_csv, export_month_summary_csv)
 - Extended pytest coverage for v2 features; all tests passing
+
+## Day 7 (Python)
+- Added summarize_month and summarize_category helpers
+- Normalized category keys in summarize() for consistent reporting
+- Added tests; pytest suite passing
