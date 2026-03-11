@@ -24,3 +24,8 @@
 - dicts_sets/two_sum.py + tests
 - file_io/log_parser_counts.py + tests
 - pytest suite: 17 passed
+
+## Day 5 (Python)
+- Built Expense Tracker mini-app (CSV-backed CLI: add/list/summary)
+- Added storage layer + tests (tmp_path) and ran end-to-end demo
+- pytest suite passing (20 tests)

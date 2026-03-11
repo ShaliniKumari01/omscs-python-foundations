@@ -87,3 +87,36 @@ def summarize(expenses: list[Expense]) -> dict[str, float]:
         key = f"CAT:{e.category}"
         totals[key] = totals.get(key, 0.0) + e.amount
     return totals
+
+
+def filter_by_category(expenses: list[Expense], category: str) -> list[Expense]:
+    """Filter expenses by category (case-insensitive, trimmed)."""
+    target = category.strip().lower()
+    return [e for e in expenses if e.category.strip().lower() == target]
+
+
+def export_summary_csv(path: str, totals: dict[str, float]) -> None:
+    """
+    Export summarize() output to CSV.
+
+    Format:
+      key,value
+      TOTAL,123.45
+      CAT:fuel,30.00
+      CAT:groceries,93.45
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+
+    with p.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["key", "value"])
+        for k in sorted(totals.keys()):
+            writer.writerow([k, f"{totals[k]:.2f}"])
+
+
+def export_month_summary_csv(path: str, expenses: list[Expense], yyyy_mm: str) -> None:
+    """Filter expenses for yyyy_mm, summarize, then export to CSV."""
+    month_expenses = filter_by_month(expenses, yyyy_mm)
+    totals = summarize(month_expenses)
+    export_summary_csv(path, totals)

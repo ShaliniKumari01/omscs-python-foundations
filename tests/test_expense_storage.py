@@ -6,6 +6,9 @@ from mini_apps.expense_tracker.storage import (
     read_expenses,
     filter_by_month,
     summarize,
+    filter_by_category,
+    export_summary_csv,
+    export_month_summary_csv,
 )
 
 
@@ -42,3 +45,48 @@ def test_summarize():
     assert totals["TOTAL"] == 35.0
     assert totals["CAT:groceries"] == 15.0
     assert totals["CAT:fuel"] == 20.0
+    
+    
+def test_filter_by_category_case_insensitive():
+    exp = [
+        Expense(date(2026, 2, 1), "Groceries", 10.0, ""),
+        Expense(date(2026, 2, 2), "fuel", 20.0, ""),
+        Expense(date(2026, 2, 3), "GROCERIES", 5.0, ""),
+    ]
+    out = filter_by_category(exp, "  groceries  ")
+    assert out == [exp[0], exp[2]]
+
+
+def test_export_summary_csv(tmp_path):
+    exp = [
+        Expense(date(2026, 2, 1), "groceries", 10.0, ""),
+        Expense(date(2026, 2, 2), "groceries", 5.5, ""),
+        Expense(date(2026, 2, 3), "fuel", 20.0, ""),
+    ]
+    totals = summarize(exp)
+
+    out = tmp_path / "summary.csv"
+    export_summary_csv(str(out), totals)
+
+    lines = out.read_text(encoding="utf-8").strip().splitlines()
+    assert lines[0] == "key,value"
+    # sorted keys => CAT:fuel, CAT:groceries, TOTAL
+    assert lines[1] == "CAT:fuel,20.00"
+    assert lines[2] == "CAT:groceries,15.50"
+    assert lines[3] == "TOTAL,35.50"
+
+
+def test_export_month_summary_csv(tmp_path):
+    exp = [
+        Expense(date(2026, 2, 1), "groceries", 10.0, ""),
+        Expense(date(2026, 2, 2), "fuel", 20.0, ""),
+        Expense(date(2026, 3, 1), "groceries", 30.0, ""),
+    ]
+
+    out = tmp_path / "feb_summary.csv"
+    export_month_summary_csv(str(out), exp, "2026-02")
+
+    content = out.read_text(encoding="utf-8")
+    assert "TOTAL,30.00" in content
+    assert "CAT:groceries,10.00" in content
+    assert "CAT:fuel,20.00" in content
