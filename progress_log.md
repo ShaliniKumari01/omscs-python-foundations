@@ -29,3 +29,8 @@
 - Built Expense Tracker mini-app (CSV-backed CLI: add/list/summary)
 - Added storage layer + tests (tmp_path) and ran end-to-end demo
 - pytest suite passing (20 tests)
+
+## Day 6 (Python) 
+- Expense Tracker v2: added filter_by_category (case-insensitive)
+- Added CSV export for summaries (export_summary_csv, export_month_summary_csv)
+- Extended pytest coverage for v2 features; all tests passing
