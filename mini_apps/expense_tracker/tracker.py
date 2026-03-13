@@ -10,6 +10,9 @@ from mini_apps.expense_tracker.storage import (
     read_expenses,
     filter_by_month,
     summarize,
+    filter_by_category,
+    export_summary_csv,
+    export_month_summary_csv,
 )
 
 DEFAULT_DATA_PATH = str(Path("mini_apps") / "expense_tracker" / "data" / "expenses.csv")
@@ -21,11 +24,16 @@ def usage() -> None:
         "Commands:\n"
         "  add YYYY-MM-DD category amount [note]\n"
         "  list [N]\n"
-        "  summary YYYY-MM\n\n"
+        "  summary YYYY-MM\n"
+        "  summary-cat category [YYYY-MM]\n"
+        "  export OUT.csv [YYYY-MM]\n\n"
         "Examples:\n"
-        '  py mini_apps/expense_tracker/tracker.py add 2026-02-12 groceries 45.20 "milk eggs"\n'
-        "  py mini_apps/expense_tracker/tracker.py list 5\n"
-        "  py mini_apps/expense_tracker/tracker.py summary 2026-02\n"
+        '  py -m mini_apps/expense_tracker/tracker.py add 2026-02-12 groceries 45.20 "milk eggs"\n'
+        "  py -m mini_apps/expense_tracker/tracker.py list 5\n"
+        "  py -m mini_apps/expense_tracker/tracker.py summary 2026-02\n"
+        "  py -m mini_apps/expense_tracker/tracker.py summary-cat groceries 2026-02\n"
+        "  py -m mini_apps/expense_tracker/tracker.py export feb_summary.csv 2026-02\n"
+        "  py -m mini_apps/expense_tracker/tracker.py export all_time_summary.csv\n"
     )
 
 
@@ -68,6 +76,16 @@ def cmd_list(args: list[str]) -> None:
         print(f"{e.spent_on.isoformat()} | {e.category:<12} | ${e.amount:>7.2f}{note_part}")
 
 
+def _print_totals(title: str, totals: dict[str, float]) -> None:
+    print(title)
+    print(f"TOTAL: ${totals['TOTAL']:.2f}")
+
+    cat_items = [(k[4:], v) for k, v in totals.items() if k.startswith("CAT:")]
+    cat_items.sort(key=lambda x: (-x[1], x[0].lower()))
+    for cat, total in cat_items:
+        print(f"{cat:<12}: ${total:.2f}")
+
+
 def cmd_summary(args: list[str]) -> None:
     if len(args) != 1:
         raise ValueError("summary requires: YYYY-MM")
@@ -81,14 +99,53 @@ def cmd_summary(args: list[str]) -> None:
         return
 
     totals = summarize(month_expenses)
-    print(f"Summary for {month}")
-    print(f"TOTAL: ${totals['TOTAL']:.2f}")
+    _print_totals(f"Summary for {month}", totals)
 
-    # category totals
-    cat_items = [(k[4:], v) for k, v in totals.items() if k.startswith("CAT:")]
-    cat_items.sort(key=lambda x: (-x[1], x[0].lower()))
-    for cat, total in cat_items:
-        print(f"{cat:<12}: ${total:.2f}")
+
+def cmd_summary_cat(args: list[str]) -> None:
+    if len(args) not in (1, 2):
+        raise ValueError("summary-cat requires: category [YYYY-MM]")
+
+    category = args[0].strip()
+    month = args[1] if len(args) == 2 else None
+    if not category:
+        raise ValueError("category cannot be empty")
+
+    expenses = read_expenses(DEFAULT_DATA_PATH)
+
+    if month:
+        expenses = filter_by_month(expenses, month)
+
+    cat_expenses = filter_by_category(expenses, category)
+
+    if not cat_expenses:
+        if month:
+            print(f"(no expenses for category '{category}' in {month})")
+        else:
+            print(f"(no expenses for category '{category}')")
+        return
+
+    totals = summarize(cat_expenses)
+    title = f"Summary for category '{category}'" + (f" in {month}" if month else "")
+    _print_totals(title, totals)
+
+
+def cmd_export(args: list[str]) -> None:
+    if len(args) not in (1, 2):
+        raise ValueError("export requires: OUT.csv [YYYY-MM]")
+
+    out_path = args[0]
+    month = args[1] if len(args) == 2 else None
+
+    expenses = read_expenses(DEFAULT_DATA_PATH)
+
+    if month:
+        export_month_summary_csv(out_path, expenses, month)
+        print(f"Exported month summary for {month} to {out_path}")
+    else:
+        totals = summarize(expenses)
+        export_summary_csv(out_path, totals)
+        print(f"Exported all-time summary to {out_path}")
 
 
 def main(argv: list[str]) -> int:
@@ -106,6 +163,10 @@ def main(argv: list[str]) -> int:
             cmd_list(args)
         elif cmd == "summary":
             cmd_summary(args)
+        elif cmd in ("summary-cat", "summary_cat"):
+            cmd_summary_cat(args)
+        elif cmd == "export":
+            cmd_export(args)
         else:
             usage()
             return 1
