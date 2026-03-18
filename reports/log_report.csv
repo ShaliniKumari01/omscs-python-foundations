@@ -1,0 +1,8 @@
+section,key,value
+meta,total_lines,5
+meta,parsed_lines,4
+levels,INFO,0
+levels,WARN,1
+levels,ERROR,3
+top_errors,Payment failed user=123,2
+top_errors,Timeout contacting service X,1
